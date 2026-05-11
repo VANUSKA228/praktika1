@@ -8,6 +8,7 @@ import json
 import secrets
 from .models import Client, Car, Order, User, ScheduleShift, Role, Manager, Master
 from .decorators import role_required
+from django.core.paginator import Paginator
 
 
 def set_user_session(request, user):
@@ -141,6 +142,11 @@ def orders_page(request):
         orders = orders_all.filter(status_id=status_filter)
     else:
         orders = orders_all
+    
+        # Пагинация: 20 заявок на страницу
+    paginator = Paginator(orders, 20)
+    page_number = request.GET.get('page')
+    orders = paginator.get_page(page_number)
 
     orders_new = orders_all.filter(status_id=1)
     orders_work = orders_all.filter(status_id=2)

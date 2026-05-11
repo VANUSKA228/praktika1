@@ -25,6 +25,17 @@
 
 <div class="grid">
 {% for order in orders %}
+    <div class="pagination">
+        {% if orders.has_previous %}
+            <a href="?page=1">&laquo; первая</a>
+            <a href="?page={{ orders.previous_page_number }}">назад</a>
+        {% endif %}
+        <span>Страница {{ orders.number }} из {{ orders.paginator.num_pages }}</span>
+        {% if orders.has_next %}
+            <a href="?page={{ orders.next_page_number }}">вперёд</a>
+            <a href="?page={{ orders.paginator.num_pages }}">последняя &raquo;</a>
+        {% endif %}
+    </div>
     <div class="card">
         <b>Заявка #{{ order.id }}</b>
 
