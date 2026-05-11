@@ -1,0 +1,198 @@
+/* static/schedule.css — современный UI */
+
+/* Header */
+
+.schedule-header h2 {
+    flex: 1;
+    text-align: center;
+    margin: 0;
+}
+.schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    gap: 12px;
+}
+
+/* Кнопки */
+.btn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
+/* Primary */
+.btn-main {
+    background: linear-gradient(135deg, #6200EE, #7F39FB);
+    color: white;
+    box-shadow: 0 4px 12px rgba(98, 0, 238, 0.25);
+}
+.btn-main:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(98, 0, 238, 0.35);
+}
+
+/* Secondary */
+.btn-alt {
+    background: #F3F1F7;
+    color: #1C1B1F;
+}
+.btn-alt:hover {
+    background: #e8e4f0;
+}
+.btn-alt.active {
+    background: #6200EE;
+    color: white;
+}
+
+/* Success */
+.btn-success {
+    background: linear-gradient(135deg, #2E7D32, #43A047);
+    color: white;
+}
+
+/* Grid */
+.grid-container {
+    width: 100%;
+}
+
+/* Row */
+.grid-row {
+    display: flex;
+    background: white;
+    border-radius: 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    overflow: hidden;
+    border: 1px solid #E5E5E5;
+    transition: all 0.2s ease;
+}
+
+.grid-row:hover {
+    transform: translateY(-2px);
+}
+
+/* Date */
+.date-cell {
+    width: 150px;
+    padding: 22px;
+    background: linear-gradient(180deg, #F8F7FA, #F1EFF6);
+    border-right: 1px solid #E0E0E0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.date-cell strong {
+    font-size: 20px;
+}
+.date-cell small {
+    color: #6200EE;
+    font-weight: 600;
+}
+
+/* Shifts */
+.shifts-cell {
+    flex: 1;
+    padding: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* Shift card */
+.shift-card {
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 13px;
+    min-width: 170px;
+    border: 1px solid #E0E0E0;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+}
+
+.shift-card:hover {
+    transform: scale(1.03);
+}
+
+/* Status */
+.status-draft {
+    background: linear-gradient(135deg, #FFFDE7, #FFF9C4);
+    border-color: #FFF59D;
+}
+
+.status-published {
+    background: linear-gradient(135deg, #F1F8E9, #DCEDC8);
+    border-color: #C5E1A5;
+}
+
+/* Delete */
+.delete-btn {
+    color: #B00020;
+    position: absolute;
+    right: 8px;
+    top: 4px;
+    font-size: 18px;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: white;
+    margin: 8% auto;
+    padding: 30px;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 24px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.2);
+    animation: fadeIn 0.25s ease;
+}
+
+/* Form */
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    margin-bottom: 6px;
+    display: block;
+    font-size: 13px;
+    color: #6b6b6b;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #E0E0E0;
+    border-radius: 12px;
+    background: #F7F6FA;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #6200EE;
+    box-shadow: 0 0 0 3px rgba(98, 0, 238, 0.12);
+}

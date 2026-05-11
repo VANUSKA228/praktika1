@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'repair_m3.css' %}">
+<link rel="stylesheet" href="{% static 'orders.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>Ремонт и диагностика</h1>
+
+<div class="grid">
+    <div class="card">
+        <b>Заявка #{{ order.id }}</b>
+
+        <div class="car-info">
+            Гос. номер: {{ order.plate }}<br>
+            Повреждения: {{ order.damage_initial }}
+        </div>
+
+        <button class="btn btn-primary" onclick="openModal()">
+            👁 Посмотреть отчет
+        </button>
+    </div>
+</div>
+
+<!-- МОДАЛКА -->
+<div id="modal" class="m3-modal" onclick="overlayClick(event)">
+    <div class="m3-modal-content">
+
+        <h3>Детали ремонта</h3>
+
+        <div class="repair-info">
+            <b>Заявка:</b> #{{ order.id }}<br>
+            <b>Гос. номер:</b> {{ order.plate }}
+        </div>
+
+        <!-- OBD -->
+        <div class="m3-form-group">
+            <label class="m3-label">Коды OBD-II</label>
+            <input id="obdInput" class="m3-input" type="text">
+        </div>
+
+        <!-- НЕИСПРАВНОСТИ -->
+        <div class="m3-form-group">
+            <label class="m3-label">Неисправности</label>
+            <div id="problemsList"></div>
+        </div>
+
+        <button class="btn btn-secondary" onclick="addProblem()">
+            + Добавить неисправность
+        </button>
+
+        <br><br>
+
+        <button class="btn btn-primary" onclick="saveData()">
+            Сохранить изменения
+        </button>
+
+        <button class="btn btn-secondary" onclick="closeModal()">
+            Закрыть
+        </button>
+
+    </div>
+</div>
+
+<script>
+// ===== СОХРАНЕННЫЕ ДАННЫЕ
+let savedData = {
+    obd: "{{ report.obd_codes|join:', ' }}",
+    problems: [
+        {% for p in report.component_problems %}
+        { text: "{{ p|escapejs }}", done: false },
+        {% endfor %}
+    ]
+};
+
+// ===== ВРЕМЕННЫЕ ДАННЫЕ
+let draftData = null;
+
+
+// ===== ОТКРЫТИЕ
+function openModal() {
+    document.getElementById('modal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+
+    draftData = JSON.parse(JSON.stringify(savedData));
+    render();
+}
+
+// ===== ЗАКРЫТИЕ
+function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+    document.body.style.overflow = '';
+    draftData = null;
+}
+
+// клик вне окна
+function overlayClick(e) {
+    if (e.target.id === 'modal') closeModal();
+}
+
+
+// ===== РЕНДЕР
+function render() {
+    document.getElementById('obdInput').value = draftData.obd;
+
+    const list = document.getElementById('problemsList');
+    list.innerHTML = '';
+
+    draftData.problems.forEach((p, index) => {
+
+        const row = document.createElement('div');
+        row.className = 'm3-checkbox-row';
+
+        // текстовое поле
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = p.text;
+        input.className = 'm3-input';
+        input.style.flex = '1';
+
+        input.addEventListener('input', (e) => {
+            draftData.problems[index].text = e.target.value;
+        });
+
+        // чекбокс
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = p.done;
+
+        checkbox.addEventListener('change', (e) => {
+            draftData.problems[index].done = e.target.checked;
+        });
+
+        row.appendChild(input);
+        row.appendChild(checkbox);
+
+        list.appendChild(row);
+    });
+}
+
+
+// ===== ДОБАВИТЬ
+function addProblem() {
+    draftData.problems.push({ text: '', done: false });
+    render();
+}
+
+
+// ===== СОХРАНИТЬ
+function saveData() {
+    draftData.obd = document.getElementById('obdInput').value;
+
+    savedData = JSON.parse(JSON.stringify(draftData));
+
+    closeModal();
+}
+
+
+// ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+</script>
+
+{% endblock %}

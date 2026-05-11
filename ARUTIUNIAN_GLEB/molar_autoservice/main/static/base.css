@@ -1,0 +1,297 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, Arial, sans-serif;
+    background: #f5f5f5;
+}
+
+/* ================= LAYOUT ================= */
+
+.layout {
+    display: flex;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+    width: 220px;
+    height: 100vh;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    background: #1f1f1f;
+    padding-top: 70px;
+
+    transition: transform 0.3s ease;
+    z-index: 100;
+}
+
+.layout.collapsed .sidebar {
+    transform: translateX(-220px);
+}
+
+/* links */
+.sidebar a {
+    display: block;
+    color: #e0e0e0;
+    padding: 14px 20px;
+    text-decoration: none;
+    border-radius: 12px;
+    margin: 5px 10px;
+}
+
+.sidebar a:hover {
+    background: #2c2c2c;
+}
+
+.sidebar a.active {
+    background: #6200ee;
+    color: white;
+}
+
+/* ================= CONTENT ================= */
+
+.content {
+    margin-left: 220px;
+    padding: 20px;
+    flex: 1;
+
+    transition: margin-left 0.3s ease;
+}
+
+.layout.collapsed .content {
+    margin-left: 0;
+}
+
+/* ================= HAMBURGER ================= */
+
+.menu-btn {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 24px;
+    cursor: pointer;
+
+    z-index: 3000;
+
+    background: transparent;
+    border: none;
+
+    color: #b0b0b0;
+    transition: 0.2s ease;
+}
+
+/* open sidebar */
+.layout.collapsed .menu-btn {
+    color: #000;
+}
+
+/* hover */
+.menu-btn:hover {
+    transform: scale(1.1);
+}
+
+/* ================= TOP AUTH ================= */
+
+.top-auth {
+    position: fixed;
+    top: 10px;
+    right: 15px;
+
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    z-index: 3000;
+}
+
+.auth-btn {
+    border: none;
+    background: #eaeaea;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+
+    font-size: 13px;
+}
+
+.auth-btn.primary {
+    background: #6200ee;
+    color: white;
+}
+
+.user-info {
+    text-align: right;
+    font-size: 13px;
+    color: #222;
+}
+
+/* ================= ALERTS ================= */
+
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* ================= MODALS (ВАЖНО) ================= */
+
+.m3-modal {
+    display: none;
+
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+
+    z-index: 5000;
+
+    align-items: center;
+    justify-content: center;
+}
+
+
+.m3-modal-content {
+    background: white;
+    padding: 30px;
+
+    width: 100%;
+    max-width: 520px;
+
+    border-radius: 20px;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ================= INPUTS ================= */
+
+.m3-input {
+    width: 100%;
+    min-height: 48px;
+
+    background: #f7f6fa;
+    border: 1px solid #e3e3e3;
+
+    border-radius: 12px;
+    padding: 12px;
+
+    margin-bottom: 12px;
+
+    font-size: 14px;
+}
+
+/* ================= BUTTONS ================= */
+
+.btn-m3-primary {
+    background: #6200ee;
+    color: white;
+
+    border: none;
+    padding: 12px;
+
+    border-radius: 12px;
+
+    width: 100%;
+    cursor: pointer;
+}
+
+.btn-m3-primary:hover {
+    opacity: 0.9;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 768px) {
+
+    .content {
+        margin-left: 0;
+    }
+
+    .sidebar {
+        transform: translateX(-220px);
+    }
+
+    .layout:not(.collapsed) .sidebar {
+        transform: translateX(0);
+    }
+}
+
+#registerStaffModal .staff-master-options {
+    width: 100% !important;
+    margin: 0 0 12px 0 !important;
+    padding: 12px 14px !important;
+    border-radius: 12px !important;
+    background: #f7f6fa !important;
+    border: 1px solid #e3e3e3 !important;
+}
+
+#registerStaffModal .staff-checkbox-row {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    cursor: pointer;
+}
+
+#registerStaffModal .staff-checkbox-row input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    margin: 1px 0 0 0 !important;
+    accent-color: #6200ee;
+    flex-shrink: 0;
+}
+
+#registerStaffModal .staff-checkbox-text {
+    display: flex !important;
+    flex-direction: column !important;
+    line-height: 1.2 !important;
+    color: #222 !important;
+    font-size: 14px !important;
+}
+
+#registerStaffModal .staff-checkbox-text small {
+    margin-top: 3px !important;
+    color: #666 !important;
+    font-size: 12px !important;
+}

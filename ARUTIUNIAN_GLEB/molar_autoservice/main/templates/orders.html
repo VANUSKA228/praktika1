@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'orders.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>Заявки</h1>
+
+<div class="filter-bar">
+    <a href="/orders/?status=all" class="filter-btn {% if current_status == 'all' %}active{% endif %}">
+        Все <span class="filter-count">{{ orders_all|length }}</span>
+    </a>
+    <a href="/orders/?status=1" class="filter-btn {% if current_status == '1' %}active{% endif %}">
+        Новые <span class="filter-count">{{ orders_new|length }}</span>
+    </a>
+    <a href="/orders/?status=2" class="filter-btn {% if current_status == '2' %}active{% endif %}">
+        В работе <span class="filter-count">{{ orders_work|length }}</span>
+    </a>
+    <a href="/orders/?status=3" class="filter-btn {% if current_status == '3' %}active{% endif %}">
+        Завершённые <span class="filter-count">{{ orders_done|length }}</span>
+    </a>
+</div>
+
+<div class="grid">
+{% for order in orders %}
+    <div class="card">
+        <b>Заявка #{{ order.id }}</b>
+
+        <div class="client-info">
+            <strong>{{ order.client_id.user_id.surname }} {{ order.client_id.user_id.name }}</strong><br>
+            Телефон: {{ order.client_id.phone }}<br>
+            Email: {{ order.client_id.user_id.email }}
+        </div>
+
+        {% if order.car_id %}
+        <div class="car-info">
+            Марка: {{ order.car_id.brand }}<br>
+            Модель: {{ order.car_id.model }}<br>
+            Гос. номер: {{ order.car_id.plate_number }}<br>
+            VIN: {{ order.car_id.vin|default:"—" }}<br>
+            Год: {{ order.car_id.year_produced|default:"—" }}<br>
+            Цвет: {{ order.car_id.color|default:"—" }}
+        </div>
+        {% else %}
+        <div class="car-info">
+            Марка: —<br>
+            Модель: —<br>
+            Гос. номер: —<br>
+            VIN: —<br>
+            Год: —<br>
+            Цвет: —
+        </div>
+        {% endif %}
+
+        <div>
+            <strong>Описание:</strong><br>
+            {{ order.problem_desc|default:"—" }}
+        </div>
+
+        <div class="order-date">
+            {{ order.created_at|date:"d.m.Y H:i" }}
+        </div>
+        {% if request.session.user_role == 'manager' or request.session.user_role == 'admin'%}
+            <button class="btn btn-primary"
+                onclick="openEditModal(
+                    '{{ order.id }}',
+                    `{{ order.problem_desc|default_if_none:''|escapejs }}`,
+                    '{{ order.status_id }}',
+                    `{{ order.client_id.user_id.surname|escapejs }} {{ order.client_id.user_id.name|escapejs }}`,
+                    '{{ order.client_id.phone|default_if_none:""|escapejs }}',
+                    '{{ order.client_id.user_id.email|default_if_none:""|escapejs }}',
+                    `{% if order.car_id %}{{ order.car_id.brand|escapejs }} {{ order.car_id.model|escapejs }}{% endif %}`,
+                    '{% if order.car_id %}{{ order.car_id.plate_number|escapejs }}{% endif %}',
+                    '{% if order.car_id %}{{ order.car_id.vin|default_if_none:""|escapejs }}{% endif %}',
+                    '{% if order.car_id %}{{ order.car_id.year_produced|default_if_none:""|escapejs }}{% endif %}',
+                    '{% if order.car_id %}{{ order.car_id.color|default_if_none:""|escapejs }}{% endif %}'
+                )">
+                Редактировать
+            </button>
+        {% endif %}
+    </div>
+{% endfor %}
+
+{% csrf_token %}
+{% if request.session.user_role == 'client' or request.session.user_role == 'manager' or request.session.user_role == 'admin'%}
+<div class="card add-card" onclick="openModal()">+</div>
+{% endif %}
+</div>
+
+<!-- СОЗДАНИЕ -->
+{% csrf_token %}
+{% if request.session.user_role == 'client' or request.session.user_role == 'manager' or request.session.user_role == 'admin'%}
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h3>Новая заявка</h3>
+
+            <form method="POST">
+                {% csrf_token %}
+            
+
+{% if request.session.user_role == 'client' %}
+    <input type="tel" name="phone"
+        value="{{ client_phone }}"
+        readonly
+        class="readonly-field"
+        required>
+
+    <div class="form-row">
+        <input type="text" name="name" placeholder="Имя"
+               value="{{ request.session.user_name }}"
+               readonly class="readonly-field" required>
+
+        <input type="text" name="surname" placeholder="Фамилия"
+               value="{{ request.session.user_surname }}"
+               readonly class="readonly-field" required>
+    </div>
+
+    <input type="email" name="email" placeholder="Email"
+           value="{{ client_email }}"
+           readonly class="readonly-field" required>
+{% else %}
+    <input type="tel" name="phone" placeholder="Телефон" required>
+
+    <div class="form-row">
+        <input type="text" name="name" placeholder="Имя" required>
+        <input type="text" name="surname" placeholder="Фамилия" required>
+    </div>
+
+    <input type="email" name="email" placeholder="Email" required>
+{% endif %}
+
+            <input type="text" name="car_plate" placeholder="Гос номер" required>
+
+            <div class="form-row">
+                <input type="text" name="car_brand" placeholder="Марка авто" required>
+                <input type="text" name="car_model" placeholder="Модель" required>
+            </div>
+
+            <input type="text" name="vin" placeholder="VIN">
+
+            <div class="form-row">
+                <input type="text" name="car_year" placeholder="Год выпуска">
+                <input type="text" name="car_color" placeholder="Цвет">
+            </div>
+
+            <textarea name="problem_desc" placeholder="Описание проблемы" required></textarea>
+
+            <button class="btn btn-primary">Создать</button>
+        </form>
+
+        <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+    </div>
+</div>
+{% endif %}
+{% if request.session.user_role == 'manager' or request.session.user_role == 'admin' %}
+<!-- РЕДАКТИРОВАНИЕ -->
+    <div id="editModal" class="modal">
+        {% if request.session.user_role == 'manager' or request.session.user_role == 'admin' %}
+            <div class="modal-content">
+                <h3>Редактирование заявки</h3>
+
+                <div id="editInfo" style="margin-bottom:15px;"></div>
+
+                <form method="POST" id="editForm">
+                    {% csrf_token %}
+
+                    <textarea name="problem_desc" id="editProblem"></textarea>
+
+                    {% if request.session.user_role == 'manager' or request.session.user_role == 'admin' %}
+                        <select name="status_id" id="editStatus">
+                            <option value="1">Новая</option>
+                            <option value="2">В работе</option>
+                            <option value="3">Завершена</option>
+                        </select>
+                    {% endif %}
+
+                    <button class="btn btn-primary">Сохранить</button>
+                </form>
+
+                <button class="btn btn-secondary" onclick="closeEditModal()">Отмена</button>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+
+<script>
+function openModal() {
+    document.getElementById('modal').style.display = 'block';
+}
+function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+}
+
+function openEditModal(id, problem, status, name, phone, email, car, plate, vin, year, color) {
+    document.getElementById('editModal').style.display = 'block';
+
+    document.getElementById('editProblem').value = problem;
+    const editStatus = document.getElementById('editStatus');
+    if (editStatus) {
+        editStatus.value = status;
+    }
+    document.getElementById('editForm').action = '/edit/' + id + '/';
+
+    document.getElementById('editInfo').innerHTML = `
+        <b>Клиент:</b> ${name}<br>
+        <b>Телефон:</b> ${phone}<br>
+        <b>Email:</b> ${email}<br><br>
+        <b>Автомобиль:</b> ${car || '—'}<br>
+        <b>Гос. номер:</b> ${plate || '—'}<br>
+        <b>VIN:</b> ${vin || '—'}<br>
+        <b>Год:</b> ${year || '—'}<br>
+        <b>Цвет:</b> ${color || '—'}
+    `;
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+</script>
+
+{% endblock %}

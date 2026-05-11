@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'schedule.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="schedule-header">
+    <h2>📅 Расписание</h2>
+</div>
+
+<div class="grid-container">
+    {% for day in date_list %}
+    <div class="grid-row">
+        <div class="date-cell">
+            <strong>{{ day|date:"d.m" }}</strong><br>
+            <small>{{ day|date:"l" }}</small>
+        </div>
+
+        <div class="shifts-cell">
+            {% for shift in shifts %}
+                {% if shift.date == day %}
+                    {% if shift.status != 'draft' or request.session.user_role == 'manager' %}
+                    <div class="shift-card status-{{ shift.status }}">
+                        {% if can_edit_schedule %}
+                            <a class="delete-btn" href="/schedule/delete/{{ shift.id }}/">×</a>
+                        {% endif %}
+
+                        <strong>{{ shift.employee.user_id.surname }} {{ shift.employee.user_id.name }}</strong><br>
+                        <small>{{ shift.start_time|time:"H:i" }} - {{ shift.end_time|time:"H:i" }}</small><br>
+                        <small>
+                            {% if shift.status == 'draft' %}
+                                Черновик
+                            {% else %}
+                                Опубликовано
+                            {% endif %}
+                        </small>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="schedule-bottom-panel" style="margin-top: 20px; display: flex; justify-content: flex-start; align-items: center; gap: 16px; flex-wrap: wrap;">
+    <div class="schedule-controls" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="?period={{ period }}&start={{ prev_date }}" class="btn btn-alt" style="width: auto;">◀</a>
+        <a href="?period=week&start={{ start_date|date:'Y-m-d' }}" class="btn btn-alt" style="width: auto;">Неделя</a>
+        <a href="?period=month&start={{ start_date|date:'Y-m-d' }}" class="btn btn-alt" style="width: auto;">Месяц</a>
+        <a href="?period={{ period }}&start={{ next_date }}" class="btn btn-alt" style="width: auto;">▶</a>
+    </div>
+
+    {% if can_edit_schedule %}
+    <div class="schedule-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-main" onclick="showModal()" style="width: auto;">+ Добавить смену</button>
+        <a href="/schedule/publish/" class="btn btn-success" style="width: auto;">📢 Опубликовать</a>
+    </div>
+    {% endif %}
+</div>
+
+{% if can_edit_schedule %}
+<div id="shiftModal" class="modal">
+    <div class="modal-content">
+        <h3>Новая смена</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Сотрудник</label>
+                <select name="employee_id" required>
+                    {% for emp in employees %}
+                        <option value="{{ emp.user_id_id }}">{{ emp.user_id.surname }} {{ emp.user_id.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Дата</label>
+                <input type="date" name="date" value="{{ start_date|date:'Y-m-d' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Начало</label>
+                <input type="time" name="start_time" value="09:00" required>
+            </div>
+
+            <div class="form-group">
+                <label>Конец</label>
+                <input type="time" name="end_time" value="18:00" required>
+            </div>
+
+            <div style="display:flex; gap: 10px;">
+                <button type="button" class="btn btn-alt" onclick="hideModal()">Отмена</button>
+                <button class="btn btn-main">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function showModal() {
+    document.getElementById('shiftModal').style.display = 'block';
+}
+
+function hideModal() {
+    document.getElementById('shiftModal').style.display = 'none';
+}
+</script>
+{% endblock %}

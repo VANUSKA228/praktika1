@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'edit_order.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <h2>
+        Редактирование заявки #{{ order.id }}
+        <span class="current-status status-{{ order.status_id }}">
+            {% if order.status_id == 1 %}🆕 Новая
+            {% elif order.status_id == 2 %}⚙️ В работе
+            {% elif order.status_id == 3 %}✅ Завершена
+            {% endif %}
+        </span>
+    </h2>
+    
+    <div class="info-block">
+        <p><strong>Клиент:</strong> {{ order.client_id.user_id.surname }} {{ order.client_id.user_id.name }}</p>
+        <p><strong>Телефон:</strong> {{ order.client_id.phone }}</p>
+        <p><strong>Email:</strong> {{ order.client_id.user_id.email }}</p>
+        {% if order.car %}
+        <p><strong>Автомобиль:</strong> {{ order.car.brand }} {{ order.car.model }} ({{ order.car.plate_number }})</p>
+        {% endif %}
+        <p><strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+    </div>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        <label>Описание проблемы:</label>
+        <textarea name="problem_desc" rows="5">{{ order.problem_desc }}</textarea>
+        
+        <label>Статус заявки:</label>
+        <select name="status_id">
+            <option value="1" {% if order.status_id == 1 %}selected{% endif %}>🆕 Новая</option>
+            <option value="2" {% if order.status_id == 2 %}selected{% endif %}>⚙️ В работе</option>
+            <option value="3" {% if order.status_id == 3 %}selected{% endif %}>✅ Завершена</option>
+        </select>
+        
+        <button type="submit">Сохранить изменения</button>
+        <a href="/orders/" class="cancel-btn">Отмена</a>
+    </form>
+</div>
+{% endblock %}

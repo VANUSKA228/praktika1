@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Система заявок</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+<div id="layout" class="layout">
+
+    <!-- ГАМБУРГЕР -->
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="sidebar">
+
+        {% if request.session.user_id %}
+
+            {% if request.session.user_role == 'client' %}
+                <a href="/orders/" class="{% if '/orders/' in request.path %}active{% endif %}">📋 Мои заявки</a>
+            {% endif %}
+
+            <!--{% if request.session.user_role == 'master' %}
+                <a href="/repair/" class="{% if '/repair/' in request.path %}active{% endif %}">🛠 Ремонт</a>
+            {% endif %}-->
+
+            {% if request.session.user_role == 'master' %}
+                <a href="/orders/" class="{% if '/orders/' in request.path %}active{% endif %}">📋 Заявки</a>
+                <a href="/schedule/" class="{% if '/schedule/' in request.path %}active{% endif %}">📅 Расписание</a>
+                <a href="/repair/" class="{% if '/repair/' in request.path %}active{% endif %}">🛠 Ремонт</a>
+            {% endif %}
+
+            {% if request.session.user_role == 'manager' or request.session.user_role == 'admin' %}
+                <a href="/orders/" class="{% if '/orders/' in request.path %}active{% endif %}">📋 Заявки</a>
+                <a href="/schedule/" class="{% if '/schedule/' in request.path %}active{% endif %}">📅 Расписание</a>
+                <a href="/repair/" class="{% if '/repair/' in request.path %}active{% endif %}">🛠 Ремонт</a>
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <!-- TOP AUTH -->
+        <div class="top-auth">
+
+            {% if request.session.user_id %}
+                <div class="user-info">
+                    <b>
+                        {{ request.session.user_surname }}
+                        {{ request.session.user_name }}
+                    </b><br>
+                    <small>Роль: {{ request.session.user_role }}</small>
+                </div>
+
+                <button class="auth-btn" onclick="logoutUser()">Выйти</button>
+
+                {% if request.session.user_role == 'manager' %}
+                    <button class="auth-btn primary" onclick="openRegisterStaff()">+ Добавить пользователя</button>
+                {% endif %}
+
+            {% else %}
+                <button class="auth-btn" onclick="openLogin()">Авторизоваться</button>
+                <button class="auth-btn primary" onclick="openRegister()">Зарегистрироваться</button>
+            {% endif %}
+
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<!-- ================= MODALS ================= -->
+
+<!-- REGISTER -->
+<div id="registerModal" class="m3-modal" onclick="overlayClose(event,'registerModal')">
+    <div class="m3-modal-content">
+
+        <h3>Регистрация</h3>
+
+        <input class="m3-input" id="r_first" placeholder="Имя">
+        <input class="m3-input" id="r_last" placeholder="Фамилия">
+        <input class="m3-input" id="r_phone" placeholder="Телефон">
+        <input class="m3-input" id="r_email" placeholder="Почта">
+        <input class="m3-input" id="r_pass" type="password" placeholder="Пароль">
+        <input class="m3-input" id="r_pass2" type="password" placeholder="Повтор пароля">
+
+        <button class="btn-m3-primary" onclick="registerUser()">
+            Зарегистрироваться
+        </button>
+
+    </div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginModal" class="m3-modal" onclick="overlayClose(event,'loginModal')">
+    <div class="m3-modal-content">
+
+        <h3>Авторизация</h3>
+
+        <input class="m3-input" id="l_email" placeholder="Почта">
+        <input class="m3-input" id="l_pass" type="password" placeholder="Пароль">
+
+        <button class="btn-m3-primary" onclick="loginUser()">
+            Войти
+        </button>
+
+    </div>
+</div>
+
+<!-- REGISTER STAFF -->
+<div id="registerStaffModal" class="m3-modal" onclick="overlayClose(event,'registerStaffModal')">
+    <div class="m3-modal-content">
+
+        <h3>Регистрация пользователя</h3>
+
+        <input class="m3-input" id="rs_first" placeholder="Имя">
+        <input class="m3-input" id="rs_last" placeholder="Фамилия">
+        <input class="m3-input" id="rs_phone" placeholder="Телефон">
+        <input class="m3-input" id="rs_email" placeholder="Почта">
+        <input class="m3-input" id="rs_pass" type="password" placeholder="Пароль">
+
+        <select class="m3-input" id="rs_role">
+            <option value="master">Мастер</option>
+            <option value="manager">Менеджер</option>
+        </select>
+        <div id="masterOptions" class="staff-master-options" style="display:none;">
+            <label class="staff-checkbox-row">
+                <input type="checkbox" id="rs_is_admin">
+                <span class="staff-checkbox-text">
+                    <b>Администратор-мастер</b>
+                    <small>Может управлять заявками</small>
+                </span>
+            </label>
+        </div>
+
+        <button class="btn-m3-primary" onclick="registerStaff()">
+            Создать
+        </button>
+
+    </div>
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+const roleSelect = document.getElementById("rs_role");
+const masterOptions = document.getElementById("masterOptions");
+
+roleSelect.addEventListener("change", function () {
+    if (this.value === "master") {
+        masterOptions.style.display = "block";
+    } else {
+        masterOptions.style.display = "none";
+ 
+        document.getElementById("rs_is_admin").checked = false;
+    }
+});
+
+function openRegisterStaff() {
+    document.getElementById("registerStaffModal").style.display = "flex";
+
+    const role = document.getElementById("rs_role").value;
+    const masterOptions = document.getElementById("masterOptions");
+
+    if (role === "master") {
+        masterOptions.style.display = "block";
+    } else {
+        masterOptions.style.display = "none";
+    }
+}
+
+function registerStaff() {
+    fetch("/register_staff/", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            first_name: document.getElementById("rs_first").value,
+            last_name: document.getElementById("rs_last").value,
+            phone: document.getElementById("rs_phone").value,
+            email: document.getElementById("rs_email").value,
+            password: document.getElementById("rs_pass").value,
+            role: document.getElementById("rs_role").value,
+            is_admin: document.getElementById("rs_is_admin").checked
+        })
+    })
+    
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert("Пользователь создан");
+            location.reload();
+        } else {
+            alert(data.error);
+        }
+    });
+}
+</script> 
+
+<script>
+function toggleMenu() {
+    document.getElementById('layout').classList.toggle('collapsed');
+}
+
+// ---------- MODALS ----------
+function openRegister() {
+    document.getElementById("registerModal").style.display = "flex";
+}
+
+function openLogin() {
+    document.getElementById("loginModal").style.display = "flex";
+}
+
+function overlayClose(e, id) {
+    if (e.target.id === id) {
+        document.getElementById(id).style.display = "none";
+    }
+}
+
+// ---------- REGISTER ----------
+function registerUser() {
+    fetch("/register/", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            first_name: document.getElementById("r_first").value,
+            last_name: document.getElementById("r_last").value,
+            phone: document.getElementById("r_phone").value,
+            email: document.getElementById("r_email").value,
+            password: document.getElementById("r_pass").value,
+            password2: document.getElementById("r_pass2").value
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert(data.error);
+    });
+}
+
+// ---------- LOGIN ----------
+function loginUser() {
+    fetch("/login/", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            email: document.getElementById("l_email").value,
+            password: document.getElementById("l_pass").value
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert(data.error);
+    });
+}
+
+// ---------- LOGOUT ----------
+function logoutUser() {
+    fetch("/logout/")
+        .then(() => location.reload());
+}
+
+// ---------- ESC ----------
+document.addEventListener('keydown', e => {
+    if (e.key === "Escape") {
+        document.querySelectorAll(".m3-modal")
+            .forEach(m => m.style.display = "none");
+    }
+});
+</script>
+
+</body>
+</html>
