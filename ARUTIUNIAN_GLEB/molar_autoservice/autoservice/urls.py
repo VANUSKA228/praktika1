@@ -17,8 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from main import views
+from django.conf import settings
+from django.urls import include, path
 
 urlpatterns = [
+    if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
     path('admin/', admin.site.urls),
     path('', views.home_page, name='home'),
     path('orders/', views.orders_page, name='orders'),
