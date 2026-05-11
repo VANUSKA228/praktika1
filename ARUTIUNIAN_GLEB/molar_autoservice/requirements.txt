@@ -1,6 +1,14 @@
 asgiref==3.11.1
+astroid==4.0.4
+colorama==0.4.6
+dill==0.4.1
 Django==6.0.5
+isort==8.0.1
+mccabe==0.7.0
+platformdirs==4.9.6
 psycopg2-binary==2.9.12
+pylint==4.0.5
 python-dotenv==1.2.2
 sqlparse==0.5.5
+tomlkit==0.15.0
 tzdata==2026.2
